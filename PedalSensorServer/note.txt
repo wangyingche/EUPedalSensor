@@ -1,0 +1,57 @@
+--2017/10/12
+V0.001
+1. create folder in github for backup.
+
+--2018/04/11
+V0.002
+1. Connection supervisory timeout "CONN_SUP_TIMEOUT" is changed from 4000ms to 1000ms.
+2. Add DOSCommandParser for the interface between pedal sensor and teraterm. Two commands are supported below.
+	1. pedal nvram dump/write/program name value
+	2. pedal sim start/stop minisec
+	
+--2018/04/12
+v0.003 
+1. battery capacity status.
+NOTE 041718 for ble_app_pedal project: (for memeory recovery.)
+Right now only can show channel's reading periodically per second.
+0. Add file adc_main.c
+1. Modify file nrf_drv_config.h, detail below.
+#define TIMER3_ENABLED 1
+#define TIMER3_CONFIG_BIT_WIDTH    TIMER_BITMODE_BITMODE_32Bit
+2. adc setting
+	.resolution         = SAADC_CONFIG_RESOLUTION	= NRF_SAADC_RESOLUTION_10BIT
+	.gain       = NRF_SAADC_GAIN1_6					= 1/6
+	.reference  = NRF_SAADC_REFERENCE_INTERNAL		= 0.6 volt
+	.mode       = NRF_SAADC_MODE_SINGLE_ENDED,		m = 0
+note: adc_reading = (Vadcin-0)*gain/reference*2^(resolution-m) = (1/3*VCC_in-0)*(1/6)/0.6*2^10 = 94.8148*VCC_in
+	adc_reading = 94.8148*VCC_in, or
+	VCC_in = adc_reading/94.8148
+
+	Vadcin = adc_reading*reference/gain/2^resolution
+
+Softdevice is no change and is s132_nrf52_2.0.0-7.alpha_softdevice.hex.
+
+Build: build successfully with 0 error, 11 warning.
+
+Test:  
+1. When it runs idle, pedal sensor will show channel 0's adc value periodically per each second. 
+2. It can connect to client normal.
+3. Test the pedal sensor installed on rotary machine and it works fine. below message is shown on wheel side.
+S_SETTLE  pos_r=35    -57 -61 dlytick=4388!!
+SerNotifySts:49 [20 54 37]
+nrfpacketcount:19042 19036
+PS_SETTLE  pos_r=40    -50 -55 dlytick=4388!!
+SerNotifySts:49 [28 50 37]
+nrfpacketcount:19091 19085
+PS_SETTLE  pos_r=41    -52 -56 dlytick=4388!!
+SerNotifySts:49 [24 53 38]
+nrfpacketcount:19141 19135
+PS_SETTLE  pos_r=49    -55 -62 dlytick=4388!!	
+4. didn't have a road test yet outdoor. 	
+
+--2018/09/11
+v0.004
+1. Change softdevice to s132_nrf52_6.0.0_softdevice.hex, instead of s132_nrf52_2.0.0-7.alpha_softdevice.hex. 
+09/11: Indoor test: Spinning sensor by rotary machine to activate wheel. Wheel runs without halt within one hour test. roughly normal.
+09/12: outdoor riding: roughly normal.
+
